@@ -1,9 +1,14 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "config.h"
 #include <getopt.h>
+#include <pthread.h>
+#include <mosquitto.h>
+#include "config.h"
+#include "device.h"
 
 void config_defaults(Config *cfg) {
     cfg->num_devices  = 10;
@@ -46,5 +51,44 @@ int main(int argc, char *argv[]) {
     config_defaults(&cfg);
     config_parse(&cfg, argc, argv);
     config_print(&cfg);
+
+    // init mosquitto library
+    mosquitto_lib_init();
+
+    // allocate array of DeviceContext (one per device)
+    DeviceContext *devices = calloc(cfg.num_devices, sizeof(DeviceContext));
+    pthread_t     *threads = calloc(cfg.num_devices, sizeof(pthread_t));
+
+    // spawn one thread per device
+    printf("\n[*] Launching %d device threads...\n", cfg.num_devices);
+    for (int i = 0; i < cfg.num_devices; i++) {
+        devices[i].device_id = i;
+        devices[i].cfg       = &cfg;
+        pthread_create(&threads[i], NULL, device_thread, &devices[i]);
+    }
+
+    // wait for all threads to finish
+    for (int i = 0; i < cfg.num_devices; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    // print results
+    printf("\n==========================================\n");
+    printf("  RESULTS\n");
+    printf("==========================================\n");
+    for (int i = 0; i < cfg.num_devices; i++) {
+        printf("  sensor_%d → sent: %d | received: %d | errors: %d\n",
+            devices[i].device_id,
+            devices[i].messages_sent,
+            devices[i].messages_received,
+            devices[i].errors);
+    }
+    printf("==========================================\n");
+
+    // cleanup
+    free(devices);
+    free(threads);
+    mosquitto_lib_cleanup();
+
     return 0;
 }
