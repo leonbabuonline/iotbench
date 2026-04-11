@@ -1,0 +1,21 @@
+# Compiled output
+iotbench
+*.o
+*.a
+
+# Build artifacts
+build/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Valgrind output
+vgcore.*
+*.log
