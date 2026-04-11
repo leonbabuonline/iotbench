@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "config.h"
+#include <getopt.h>
 
 void config_defaults(Config *cfg) {
     cfg->num_devices  = 10;
