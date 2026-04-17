@@ -9,6 +9,7 @@
 #include <mosquitto.h>
 #include "config.h"
 #include "device.h"
+#include "stats.h"
 
 void config_defaults(Config *cfg)
 {
@@ -129,14 +130,10 @@ int main(int argc, char *argv[])
     }
 
     // print results
-    printf("\n==========================================\n");
-    printf("  RESULTS\n");
-    printf("==========================================\n");
-    for (int i = 0; i < cfg.num_devices; i++)
-    {
-        print_latency_stats(&devices[i]);
-    }
-    printf("==========================================\n");
+    // replace from "print results" to before free()
+    GlobalStats gs;
+    stats_compute(&gs, devices, cfg.num_devices, cfg.duration_sec);
+    stats_print(&gs, cfg.num_devices, cfg.duration_sec);
 
     // cleanup
     free(devices);
