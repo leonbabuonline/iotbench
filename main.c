@@ -9,6 +9,7 @@
 #include <mosquitto.h>
 #include "config.h"
 #include "device.h"
+#include "stats.h"
 
 void config_defaults(Config *cfg)
 {
@@ -17,12 +18,13 @@ void config_defaults(Config *cfg)
     cfg->interval_ms = 1000;
     cfg->duration_sec = 30;
     strncpy(cfg->host, "localhost", sizeof(cfg->host));
+    cfg->output_file[0] = '\0'; // empty = no file output
 }
 
 void config_parse(Config *cfg, int argc, char *argv[])
 {
     int opt;
-    while ((opt = getopt(argc, argv, "n:h:p:i:d:")) != -1)
+    while ((opt = getopt(argc, argv, "n:h:p:i:d:o:")) != -1)
     {
         switch (opt)
         {
@@ -40,6 +42,9 @@ void config_parse(Config *cfg, int argc, char *argv[])
             break;
         case 'd':
             cfg->duration_sec = atoi(optarg);
+            break;
+        case 'o':
+            strncpy(cfg->output_file, optarg, sizeof(cfg->output_file) - 1);
             break;
         default:
             fprintf(stderr, "Usage: %s -n <devices> -h <host> -p <port> -i <interval_ms> -d <duration_sec>\n", argv[0]);
@@ -97,6 +102,8 @@ void config_print(Config *cfg)
     printf("  Interval  : %d ms\n", cfg->interval_ms);
     printf("  Duration  : %d sec\n", cfg->duration_sec);
     printf("==========================================\n");
+    if (cfg->output_file[0] != '\0')
+        printf("  Output    : %s\n", cfg->output_file);
 }
 
 int main(int argc, char *argv[])
@@ -129,14 +136,11 @@ int main(int argc, char *argv[])
     }
 
     // print results
-    printf("\n==========================================\n");
-    printf("  RESULTS\n");
-    printf("==========================================\n");
-    for (int i = 0; i < cfg.num_devices; i++)
-    {
-        print_latency_stats(&devices[i]);
-    }
-    printf("==========================================\n");
+    // replace from "print results" to before free()
+    GlobalStats gs;
+    stats_compute(&gs, devices, cfg.num_devices, cfg.duration_sec);
+    stats_print(&gs, cfg.num_devices, cfg.duration_sec);
+    stats_save_json(&gs, &cfg);
 
     // cleanup
     free(devices);

@@ -7,6 +7,7 @@ typedef struct {
     int  port;
     int  interval_ms;
     int  duration_sec;
+    char output_file[256];   // ← new: -o results.json
 } Config;
 
 void config_defaults(Config *cfg);
