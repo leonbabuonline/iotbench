@@ -1,0 +1,18 @@
+{
+  "devices": 1000,
+  "host": "localhost",
+  "port": 1883,
+  "duration_sec": 10,
+  "interval_ms": 1000,
+  "messages_sent": 9667,
+  "messages_received": 1370,
+  "errors": 333,
+  "error_rate": 3.44,
+  "throughput": 966.70,
+  "latency": {
+    "p50": 0,
+    "p95": 2,
+    "p99": 22,
+    "max": 60
+  }
+}
