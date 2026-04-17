@@ -1,3 +1,12 @@
+![Language](https://img.shields.io/badge/language-C-blue)
+![Platform](https://img.shields.io/badge/platform-Linux-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Memory](https://img.shields.io/badge/memory-valgrind%20clean-brightgreen)
+
+
+
+
+
 # iotbench — MQTT Benchmarking Tool
 
 A lightweight, multi-threaded MQTT benchmarking tool written in C.  
